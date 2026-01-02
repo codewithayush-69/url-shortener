@@ -1,0 +1,33 @@
+<header class="header">
+  <div class="header-container">
+    <div class="logo">
+      <h1 class="brand-title">🔗 URL Shortener</h1>
+      <p class="tagline">Create short, shareable links</p>
+    </div>
+    <nav class="navbar">
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <% if (typeof user !== 'undefined' && user) { %>
+          <li><a href="/profile" class="nav-link">Profile</a></li>
+          <li><a href="/logout" class="nav-link">Logout</a></li>
+        <% } else { %>
+          <li><a href="/login" class="nav-link">Login</a></li>
+          <li><a href="/register" class="nav-link">Register</a></li>
+        <% } %>
+      </ul>
+    </nav>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+          if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      });
+    </script>
+  </div>
+</header>

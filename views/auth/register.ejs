@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css" />
+    <title>Register - URL Shortener</title>
+  </head>
+  <body>
+    <%- include('../header') %>
+    
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h1>Create Account</h1>
+          <p class="auth-subtext">Join us and start shortening URLs</p>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-error">
+            <span class="alert-icon">⚠️</span>
+            <span><%= error %></span>
+          </div>
+        <% } %>
+
+        <form action="/register" method="POST" class="auth-form">
+          <div class="form-group">
+            <label for="fullname">Full Name</label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              placeholder="John Doe" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              placeholder="you@example.com" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              placeholder="••••••••" 
+              required 
+              minlength="6"
+            />
+            <small class="password-hint">Must be at least 6 characters</small>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input 
+              type="password" 
+              id="confirm_password" 
+              name="confirm_password" 
+              placeholder="••••••••" 
+              required 
+            />
+          </div>
+
+          <div class="form-group checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" name="terms" required />
+              <span>I agree to the <a href="#" class="link">Terms of Service</a> and <a href="#" class="link">Privacy Policy</a></span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary btn-block">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Already have an account? 
+            <a href="/login" class="auth-link">Sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <%- include('../footer') %>
+  </body>
+</html>

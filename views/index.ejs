@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>URL Shortener</title>
+  </head>
+  <body>
+    <%- include('header') %>
+
+    <div class="main-container">
+      <h1>URL Shortener</h1>
+
+      <div class="form-section">
+        <h2>Create a Short Link</h2>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-error">
+            <span class="alert-icon">⚠️</span>
+            <span><%= error %></span>
+          </div>
+        <% } %>
+
+        <% if (typeof isLoggedIn !== 'undefined' && isLoggedIn) { %>
+          <div class="alert alert-success" id="successAlert">
+            <span class="alert-icon">✅</span>
+            <span>Welcome back! You are logged in.</span>
+          </div>
+          <script>
+            setTimeout(() => {
+              const successAlert = document.getElementById('successAlert');
+              if (successAlert) {
+                successAlert.style.display = 'none';
+              }
+            }, 30000);
+          </script>
+        <% } else { %>
+          <div class="alert alert-info">
+            <span class="alert-icon">ℹ️</span>
+            <span>Please log in to manage your shortened URLs.</span>
+          </div>
+        <% } %>
+
+        <form action="/" method="post" class="url-form">
+          <div>
+            <label for="url">Enter the URL</label>
+            <input
+              type="url"
+              name="url"
+              id="url"
+              placeholder="https://example.com/very/long/url"
+              required
+            />
+          </div>
+          <div>
+            <label for="shortCode">Custom Short Code (Optional)</label>
+            <input
+              type="text"
+              name="shortCode"
+              id="shortCode"
+              placeholder="mylink"
+            />
+          </div>
+          <button type="submit" class="btn-primary">Shorten URL</button>
+        </form>
+      </div>
+
+      <% if (links && links.length > 0) { %>
+      <div class="urls-section">
+        <h2>Your Shortened URLs</h2>
+        <ul id="Shorten_url">
+          <% links.forEach(function({shortCode, url}) { const truncatedURL =
+          url.length > 50 ? url.slice(0, 50) + '...' : url; %>
+          <li>
+            <div class="url-item">
+              <div class="short-url">
+                <strong
+                  ><a href="/<%= shortCode %>" target="_blank">
+                    <%= host %>/<%= shortCode %>
+                  </a></strong
+                >
+              </div>
+              <div class="original-url">
+                <span class="label">Original:</span>
+                <span class="url-text"><%= truncatedURL %></span>
+              </div>
+            </div>
+          </li>
+          <% }); %>
+        </ul>
+      </div>
+      <% } else { %>
+      <div class="empty-state">
+        <p>No shortened URLs yet. Create your first one above!</p>
+      </div>
+      <% } %>
+    </div>
+
+    <%- include('footer') %>
+  </body>
+</html>
