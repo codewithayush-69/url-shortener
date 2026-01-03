@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getRegisterPage, getLoginPage, postLoginPage, postRegisterPage } from "../controller/auth.controller.js";
+import { getRegisterPage, getLoginPage, postLoginPage, postRegisterPage, getProfilePage } from "../controller/auth.controller.js";
 
 const router = Router();
 
@@ -13,10 +13,8 @@ router
 .get(getLoginPage)
 .post(postLoginPage);
 
-router.get("/logout", (req, res) => {
-  res.clearCookie("isLoggedIn");
-  res.clearCookie("user");
-  return res.redirect("/");
-});
+router
+.route("/profile")
+.get(getProfilePage)
 
 export const authRoutes = router; 

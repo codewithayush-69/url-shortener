@@ -43,7 +43,7 @@ export const verifyPassword = async (hashedPassword, plainPassword) =>{
 }
 
 export const genrateToken = (payload) => {  
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });  
 };
 
 export const verifyJwtToken = (token) => {

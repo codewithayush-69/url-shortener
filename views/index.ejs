@@ -22,7 +22,7 @@
           </div>
         <% } %>
 
-        <% if (typeof isLoggedIn !== 'undefined' && isLoggedIn) { %>
+        <% if (typeof user !== 'undefined' && user) { %>
           <div class="alert alert-success" id="successAlert">
             <span class="alert-icon">✅</span>
             <span>Welcome back! You are logged in.</span>

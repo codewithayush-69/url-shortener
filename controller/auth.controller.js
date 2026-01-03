@@ -42,8 +42,6 @@ export const postLoginPage = async (req, res) => {
 
     let verfication = await verifyPassword(user.passwordHash, password);
 
-    console.log(verfication);
-
     if (!verfication) {
       return res.render("auth/login", { error: "Incorrect password" });
     }
@@ -53,10 +51,19 @@ export const postLoginPage = async (req, res) => {
       username: user.username,
       email: user.email
      });
-    res.cookie("token", token, )
+    console.log(token);
+    res.cookie("token", token);
+
     
     return res.redirect("/");
   } catch (error) {
     console.error("Login error:", error);
   }
+};
+
+export const getProfilePage = (req, res) => {
+  if (!req.user) {
+    return res.redirect("/login");
+  }
+  return res.render("auth/profile", );
 };

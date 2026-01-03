@@ -11,10 +11,14 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "views"));
 
-app.use(express.static("files"));
+app.use(express.static("style"));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(verfiAuthentication);
+app.use((req, res, next)=>{
+  res.locals.user = req.user;
+  next();
+});
 
 app.use(authRoutes);
 app.use(shortnerRouter);

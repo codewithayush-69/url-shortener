@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css" />
+    <title>Profile</title>
+  </head>
+  <body>
+    <div class="profile-container">
+
+      <div class="profile-header">
+        <h1>User Profile</h1>
+      </div>
+
+      <div class="profile-info">
+        <span class="label">Username:</span>
+        <span class="value"><%= user.username %></span>
+      </div>
+
+      <div class="profile-info">
+        <span class="label">Email:</span>
+        <span class="value"><%= user.email %></span>
+      </div>
+
+      <div class="profile-actions">
+        <form action="/profile/edit" method="GET">
+          <button class="btn btn-edit" type="submit">Edit Profile</button>
+        </form>
+
+        <form action="/logout" method="POST">
+          <button class="btn btn-logout" type="submit">Logout</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

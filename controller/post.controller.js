@@ -7,9 +7,8 @@ import {
 
 export const getURLShortner = async (req, res) => {
   try {
-    let isLoggedIn = req.cookies.token;
     const links = await loadLink();
-    return res.render("index", { links, host: req.host, isLoggedIn });
+    return res.render("index", { links, host: req.host});
   } catch (error) {
     return res.status(500).send("Internal server error 3");
   }
