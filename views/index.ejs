@@ -15,17 +15,15 @@
       <div class="form-section">
         <h2>Create a Short Link</h2>
 
-        <% if (typeof error !== 'undefined' && error) { %>
+        <% if (typeof messages.error !== 'undefined' && messages.error) { %>
           <div class="alert alert-error">
-            <span class="alert-icon">⚠️</span>
-            <span><%= error %></span>
+            <span><%= messages.error[0] %></span>
           </div>
         <% } %>
 
         <% if (typeof user !== 'undefined' && user) { %>
           <div class="alert alert-success" id="successAlert">
-            <span class="alert-icon">✅</span>
-            <span>Welcome back! You are logged in.</span>
+            <span>You are logged in.</span>
           </div>
           <script>
             setTimeout(() => {
@@ -37,7 +35,6 @@
           </script>
         <% } else { %>
           <div class="alert alert-info">
-            <span class="alert-icon">ℹ️</span>
             <span>Please log in to manage your shortened URLs.</span>
           </div>
         <% } %>
@@ -78,8 +75,8 @@
                 <strong
                   ><a href="/<%= shortCode %>" target="_blank">
                     <%= host %>/<%= shortCode %>
-                  </a></strong
-                >
+                  </a>
+                </strong>
               </div>
               <div class="original-url">
                 <span class="label">Original:</span>

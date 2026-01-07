@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 import { shortnerRouter } from "./routes/URL.routes.js";
 import { authRoutes } from "./routes/auth.routes.js";
 import { verfiAuthentication } from "./middlewares/verify-auth.middlewaers.js";
+import session from "express-session";
+import flash from "connect-flash";
 
 const app = express();
 
@@ -14,9 +16,22 @@ app.set("views", path.join(process.cwd(), "views"));
 app.use(express.static("style"));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use(
+  session({
+    secret: "flash-only-secret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(flash());
+
 app.use(verfiAuthentication);
-app.use((req, res, next)=>{
+
+app.use((req, res, next) => {
   res.locals.user = req.user;
+  res.locals.messages = req.flash();
   next();
 });
 

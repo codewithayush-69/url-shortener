@@ -16,10 +16,9 @@
           <p class="auth-subtext">Sign in to your account</p>
         </div>
 
-        <% if (typeof error !== 'undefined' && error) { %>
+        <% if (typeof messages.error !== 'undefined' && messages.error) { %>
           <div class="alert alert-error">
-            <span class="alert-icon">⚠️</span>
-            <span><%= error %></span>
+            <span><%= messages.error[0] %></span>
           </div>
         <% } %>
 

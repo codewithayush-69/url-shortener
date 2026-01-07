@@ -1,20 +1,24 @@
 import { Router } from "express";
-import { getRegisterPage, getLoginPage, postLoginPage, postRegisterPage, getProfilePage } from "../controller/auth.controller.js";
+import * as authController from "../controller/auth.controller.js";
 
 const router = Router();
 
 router
 .route("/register")
-.get(getRegisterPage)
-.post(postRegisterPage);
+.get(authController.getRegisterPage)
+.post(authController.postRegisterPage);
 
 router
 .route("/login")
-.get(getLoginPage)
-.post(postLoginPage);
+.get(authController.getLoginPage)
+.post(authController.postLoginPage);
 
 router
-.route("/profile")
-.get(getProfilePage)
+.route("/profile/edit")
+.get(authController.getEditProfilePage)
+.post(authController.postEditProfilePage);
+
+router.route("/profile").get(authController.getProfilePage);
+router.route("/logout").post(authController.logoutUser);
 
 export const authRoutes = router; 

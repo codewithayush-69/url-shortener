@@ -6,32 +6,36 @@
     <link rel="stylesheet" href="/style.css" />
     <title>Profile</title>
   </head>
+  <%- include('../header') %>
+
   <body>
-    <div class="profile-container">
+    <span class="profile-page">
+      <div class="profile-container">
+        <div class="profile-header">
+          <h1>User Profile</h1>
+        </div>
 
-      <div class="profile-header">
-        <h1>User Profile</h1>
+        <div class="profile-info">
+          <span class="label">Username:</span>
+          <span class="value"><%= users.username %></span>
+        </div>
+
+        <div class="profile-info">
+          <span class="label">Email:</span>
+          <span class="value"><%= users.email %></span>
+        </div>
+
+        <div class="profile-actions">
+          <form action="/profile/edit" method="GET">
+            <button class="btn btn-edit" type="submit">Edit Profile</button>
+          </form>
+
+          <form action="/logout" method="POST">
+            <button class="btn btn-logout" type="submit">Logout</button>
+          </form>
+        </div>
       </div>
-
-      <div class="profile-info">
-        <span class="label">Username:</span>
-        <span class="value"><%= user.username %></span>
-      </div>
-
-      <div class="profile-info">
-        <span class="label">Email:</span>
-        <span class="value"><%= user.email %></span>
-      </div>
-
-      <div class="profile-actions">
-        <form action="/profile/edit" method="GET">
-          <button class="btn btn-edit" type="submit">Edit Profile</button>
-        </form>
-
-        <form action="/logout" method="POST">
-          <button class="btn btn-logout" type="submit">Logout</button>
-        </form>
-      </div>
-    </div>
+    </span>
   </body>
+  <%- include('../footer') %>
 </html>

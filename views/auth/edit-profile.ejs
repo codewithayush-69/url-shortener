@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edit Profile</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <div class="edit-profile-page">
+    <div class="edit-profile-container">
+
+      <div class="edit-profile-header">
+        <h1>Edit Profile</h1>
+      </div>
+
+      <form class="edit-profile-form" action="/profile/edit" method="POST">
+
+        <div class="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            name="username"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+          />
+        </div>
+
+        <% if (typeof messages.error !== "undefined" && messages.error) { %>
+          <div class="alert alert-error">
+            <span><%= messages.error[0] %></span>
+          </div>
+        <% } %>
+
+        <div class="form-group">
+          <label>New Password (optional)</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Leave blank to keep current password"
+          />
+          <small>Fill only if you want to change password</small>
+        </div>
+
+        <button type="submit" class="btn-save">
+          Save Changes
+        </button>
+
+      </form>
+    </div>
+  </div>
+</body>
+</html>
