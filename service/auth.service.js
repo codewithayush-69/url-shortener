@@ -1,8 +1,13 @@
 import { db } from "../config/db-client.js";
-import { users } from "../drizzle/schema.js";
+import { users, sessionsTable } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+import {
+  ACCESS_TOKEN_EXPIRY,
+  MILLISECONDS_PER_SECOND,
+  REFRESH_TOKEN_EXPIRY,
+} from "../config/constants.js";
 
 export const insertUser = async ({ username, email, hashedPassword }) => {
   const data = await db.insert(users).values({
@@ -20,7 +25,7 @@ export const getUserByEmail = async (email) => {
 export const getUserById = async (id) => {
   const rows = await db.select().from(users).where(eq(users.id, id));
   return rows[0];
-}
+};
 
 export const hashingPassword = async (password) => {
   return await argon2.hash(password, {
@@ -47,11 +52,38 @@ export const verifyPassword = async (hashedPassword, plainPassword) => {
   }
 };
 
-export const genrateToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
+// export const genrateToken = (payload) => {
+//   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
+// };
+
+export const createSession = async (userId, { ip, userAgent }) => {
+  const session = await db
+    .insert(sessionsTable)
+    .values({
+      userId,
+      ip,
+      userAgent,
+    })
+    .$returningId();
+  return session[0];
+};
+
+export const genrateAccessToken = (payload) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRY / MILLISECONDS_PER_SECOND,
+  });
+};
+
+export const createRefreshToken = (sessionId) => {
+  return jwt.sign({ sessionId }, process.env.JWT_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRY / MILLISECONDS_PER_SECOND,
+  });
 };
 
 export const verifyJwtToken = (token) => {
+  if (!token) {
+    throw new Error("Token is required");
+  }
   return jwt.verify(token, process.env.JWT_SECRET);
 };
 
@@ -75,5 +107,43 @@ export const updateUser = async (userId, data) => {
   }
 
   await db.update(users).set(updateData).where(eq(users.id, userId));
+};
+
+const findBysessionId = async (sessionId) => {
+  const rows = await db
+    .select()
+    .from(sessionsTable)
+    .where(eq(sessionsTable.id, sessionId));
+  return rows[0];
+};
+
+export const checkRefreshToken = async (token) => {
+  const decoded = verifyJwtToken(token);
+  const currentSession = await findBysessionId(decoded.sessionId);
+  
+  if (!currentSession||!currentSession.valid) {
+    throw new Error("Invalid session");
+  }
+  
+  const user = await getUserById(currentSession.userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  const userinfo = {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    sessionId: currentSession.id,
+  };
+
+  const newAccessToken = genrateAccessToken(userinfo);
+  const newRefreshToken = createRefreshToken(currentSession.id);
+
+  return {
+    newAccessToken,
+    newRefreshToken,
+    user: userinfo
+  };
 
 };

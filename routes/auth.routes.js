@@ -21,4 +21,9 @@ router
 router.route("/profile").get(authController.getProfilePage);
 router.route("/logout").post(authController.logoutUser);
 
+router
+.route("/profile/edit")
+.get(authController.getEditProfilePage)
+.post(authController.postEditProfilePage);
+
 export const authRoutes = router; 

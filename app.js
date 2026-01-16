@@ -1,12 +1,14 @@
 import "dotenv/config";
-import express from "express";
-import path from "path";
 import cookieParser from "cookie-parser";
-import { shortnerRouter } from "./routes/URL.routes.js";
-import { authRoutes } from "./routes/auth.routes.js";
-import { verfiAuthentication } from "./middlewares/verify-auth.middlewaers.js";
-import session from "express-session";
+import express from "express";
 import flash from "connect-flash";
+import path from "path";
+import requestIp from "request-ip";
+import session from "express-session";
+
+import { authRoutes } from "./routes/auth.routes.js";
+import { shortnerRouter } from "./routes/URL.routes.js";
+import { verfiAuthentication } from "./middlewares/verify-auth.middlewaers.js";
 
 const app = express();
 
@@ -26,7 +28,7 @@ app.use(
 );
 
 app.use(flash());
-
+app.use(requestIp.mw());
 app.use(verfiAuthentication);
 
 app.use((req, res, next) => {

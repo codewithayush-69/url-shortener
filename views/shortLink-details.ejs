@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css" />
+    <!-- ZMDI Material Design Iconic Font CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/material-design-iconic-font@2.2.0/dist/css/material-design-iconic-font.min.css"
+    />
+    <title>Edit URL - URL Shortener</title>
+  </head>
+
+  <body>
+    <%- include('header') %>
+
+    <div class="shortlink-page">
+      <section class="shortlink-container">
+        <div class="shortlink-wrapper">
+          <div class="shortlink-status">
+            <% if(user) { %>
+            <div class="status-badge status-success">
+              <i class="zmdi zmdi-check-circle"></i>
+              <span>You are logged in</span>
+            </div>
+            <% } else { %>
+            <div class="status-badge status-warning">
+              <i class="zmdi zmdi-alert-circle"></i>
+              <span>You are not logged in</span>
+            </div>
+            <% } %>
+          </div>
+
+          <div class="shortlink-form-section">
+            <h1 class="shortlink-title">Edit Short Link</h1>
+            <form
+              action="/edit/<%= id  %>"
+              method="post"
+              class="shortlink-form"
+              id="shortlink-form"
+            >
+              <div class="form-group-shortlink">
+                <label for="url" class="form-label">
+                  <i class="zmdi zmdi-link"></i> Original URL
+                </label>
+                <input
+                  type="url"
+                  name="url"
+                  id="url"
+                  class="form-input"
+                  value="<%= url %>"
+                  required
+                />
+              </div>
+
+              <div class="form-group-shortlink">
+                <label for="shortCode" class="form-label">
+                  <i class="zmdi zmdi-code"></i> Short Code
+                </label>
+                <input
+                  type="text"
+                  name="shortCode"
+                  id="shortCode"
+                  class="form-input"
+                  value="<%= shortCode %>"
+                  required
+                />
+              </div>
+
+              <% if (typeof messages.error !== 'undefined' && messages.error) {%>
+              <div class="alert alert-error">
+                <i class="zmdi zmdi-close-circle-o"></i>
+                <span><%= messages.error[0] %></span>
+              </div>
+              <% } %>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-update">
+                  <i class="zmdi zmdi-edit"></i> Update Link
+                </button>
+                <a href="/" class="btn btn-cancel">
+                  <i class="zmdi zmdi-close"></i> Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <%- include('footer') %>
+  </body>
+</html>
