@@ -1,23 +1,14 @@
-import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "../config/constants.js";
+import {
+  ACCESS_TOKEN_COOKIE_OPTIONS,
+  REFRESH_TOKEN_COOKIE_OPTIONS,
+} from "../config/constants.js";
 import { verifyJwtToken, checkRefreshToken } from "../service/auth.service.js";
 
-// export const verfiAuthentication = (req, res, next) => {
-//   const token = req.cookies.token;
-//     if (!token) {
-//         req.user = null;
-//         return next();
-//     }
-//     try {
-//         const decodedToken = verifyJwtToken(token);
-//         req.user = decodedToken;
-//        return next();
-//     } catch (err) {
-//         console.error("Token verification error:", err);
-//         req.user = null;
-//         return next();
-//     }
-// };
-
+/**
+ * Middleware to verify JWT tokens from cookies
+ * Handles both access token and refresh token verification
+ * Sets req.user if authentication is successful
+ */
 export const verfiAuthentication = async (req, res, next) => {
   const accessToken = req.cookies.access_token;
   const refreshToken = req.cookies.refresh_token;
@@ -38,6 +29,7 @@ export const verfiAuthentication = async (req, res, next) => {
       req.user = null;
     }
   }
+
   if (refreshToken) {
     try {
       const { newAccessToken, newRefreshToken, user } =
@@ -45,26 +37,19 @@ export const verfiAuthentication = async (req, res, next) => {
 
       req.user = user;
 
-      const baseConfig = {
-        httpOnly: true,
-        secure: false,
-      };
-
-      res.cookie("access_token", newAccessToken, {
-        ...baseConfig,
-        maxAge: ACCESS_TOKEN_EXPIRY,
-      });
-      res.cookie("refresh_token", newRefreshToken, {
-        ...baseConfig,
-        maxAge: REFRESH_TOKEN_EXPIRY,
-      });
+      res.cookie("access_token", newAccessToken, ACCESS_TOKEN_COOKIE_OPTIONS);
+      res.cookie(
+        "refresh_token",
+        newRefreshToken,
+        REFRESH_TOKEN_COOKIE_OPTIONS
+      );
 
       return next();
-
     } catch (error) {
-      console.log(error);
+      console.error("Refresh token verification error:", error);
       req.user = null;
     }
   }
+
   return next();
 };

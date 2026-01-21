@@ -1,8 +1,4 @@
 import {
-  ACCESS_TOKEN_EXPIRY,
-  REFRESH_TOKEN_EXPIRY,
-} from "../config/constants.js";
-import {
   loginUserSchema,
   registerUserSchema,
 } from "../Register-user-schema/auth.validator.js";
@@ -17,99 +13,84 @@ import {
   createRefreshToken,
   genrateAccessToken,
 } from "../service/auth.service.js";
+import { validate, getFirstErrorMessage } from "../utils/validation.js";
+import {
+  setAuthCookies,
+  clearAuthCookies,
+  requireNotAuth,
+  flashErrorAndRedirect,
+  flashSuccessAndRedirect,
+  requireAuth,
+} from "../utils/response.js";
 
 export const getRegisterPage = (req, res) => {
+  if (!requireNotAuth(req, res)) return;
   return res.render("auth/register");
 };
 
 export const postRegisterPage = async (req, res, next) => {
-  if (req.user) {
-    return res.redirect("/");
-  }
+  if (!requireNotAuth(req, res)) return;
+
   try {
-    // const { username, email, password, confirm_password } = req.body;
-    const { data, error } = registerUserSchema.safeParse(req.body);
+    const { data, error } = validate(registerUserSchema, req.body);
     if (error) {
-      const errorMessages = error.errors[0].message;
-      req.flash("error", errorMessages);
-      return res.redirect("/register");
+      return flashErrorAndRedirect(req, res, getFirstErrorMessage(error), "/register");
     }
 
     const { username, email, password, confirm_password } = data;
 
     if (password !== confirm_password) {
-      req.flash("error", "Passwords do not match");
-      return res.redirect("/register");
+      return flashErrorAndRedirect(req, res, "Passwords do not match", "/register");
     }
 
     let existingUser = await getUserByEmail(email);
 
     if (existingUser) {
-      req.flash("error", "Email already exists");
-      return res.redirect("/register");
+      return flashErrorAndRedirect(req, res, "Email already exists", "/register");
     }
 
     const hashedPassword = await hashingPassword(password);
     await insertUser({ username, email, hashedPassword });
 
-    let user = await getUserByEmail(email);
+    const user = await getUserByEmail(email);
 
-    const session = createSession(user.id, {
+    const session = await createSession(user.id, {
       ip: req.ip,
       userAgent: req.headers["user-agent"],
     });
 
-    const accessToken = genrateAccessToken({
+    const userPayload = {
       id: user.id,
       username: user.username,
       email: user.email,
       sessionId: session.id,
-    });
-
-    const refreshToken = createRefreshToken(session.id);
-
-    const baseConfig = {
-      httpOnly: true,
-      secure: false,
     };
 
-    res.cookie("access_token", accessToken, {
-      ...baseConfig,
-      maxAge: ACCESS_TOKEN_EXPIRY,
-    });
-    res.cookie("refresh_token", refreshToken, {
-      ...baseConfig,
-      maxAge: REFRESH_TOKEN_EXPIRY,
-    });
+    const accessToken = genrateAccessToken(userPayload);
+    const refreshToken = createRefreshToken(session.id);
 
-    req.flash("success", "Account created successfully");
-    return res.redirect("/");
+    setAuthCookies(res, accessToken, refreshToken);
+
+    return flashSuccessAndRedirect(req, res, "Account created successfully", "/");
   } catch (error) {
     console.error("Registration error:", error);
-    req.flash("error", "An error occurred during registration");
-    return res.redirect("/register");
+    return flashErrorAndRedirect(req, res, "An error occurred during registration", "/register");
   }
 };
 
 export const getLoginPage = (req, res) => {
-  if (req.user) {
-    return res.redirect("/");
-  }
+  if (!requireNotAuth(req, res)) return;
   return res.render("auth/login");
 };
 
 export const postLoginPage = async (req, res) => {
   try {
-    if (req.user) {
-      return res.redirect("/");
-    }
+    if (!requireNotAuth(req, res)) return;
 
-    const { data, error } = loginUserSchema.safeParse(req.body);
+    const { data, error } = validate(loginUserSchema, req.body);
 
     if (error) {
-      const errorMessages = error.errors[0].message;
-      req.flash("error", errorMessages);
-      return res.redirect("/login");
+      return flashErrorAndRedirect(req, res, getFirstErrorMessage(error), "/login");
     }
 
     const { email, password } = data;
@@ -117,88 +98,76 @@ export const postLoginPage = async (req, res) => {
     let user = await getUserByEmail(email);
 
     if (!user || !(await verifyPassword(user.passwordHash, password))) {
-      req.flash("error", "Invalid email or password");
-      return res.redirect("/login");
+      return flashErrorAndRedirect(req, res, "Invalid email or password", "/login");
     }
 
-    const session = createSession(user.id, {
+    const session = await createSession(user.id, {
       ip: req.ip,
       userAgent: req.headers["user-agent"],
     });
 
-    const accessToken = genrateAccessToken({
+    const userPayload = {
       id: user.id,
       username: user.username,
       email: user.email,
       sessionId: session.id,
-    });
-
-    const refreshToken = createRefreshToken(session.id);
-
-    const baseConfig = {
-      httpOnly: true,
-      secure: false,
     };
 
-    res.cookie("access_token", accessToken, {
-      ...baseConfig,
-      maxAge: ACCESS_TOKEN_EXPIRY,
-    });
-    res.cookie("refresh_token", refreshToken, {
-      ...baseConfig,
-      maxAge: REFRESH_TOKEN_EXPIRY,
-    });
+    const accessToken = genrateAccessToken(userPayload);
+    const refreshToken = createRefreshToken(session.id);
 
-    return res.redirect("/");
+    setAuthCookies(res, accessToken, refreshToken);
+
+    return flashSuccessAndRedirect(req, res, "Login successful", "/");
   } catch (error) {
     console.error("Login error:", error);
   }
 };
 
 export const getProfilePage = async (req, res) => {
-  console.log(req.user);
+  if (!requireAuth(req, res)) return ;
 
-  if (!req.user) {
-    return res.redirect("/login");
+  try {
+    const user = await getUserById(req.user.id);
+
+    if (!user) {
+      return flashErrorAndRedirect(req, res, "User not found", "/login");
+    }
+
+    return res.render("auth/profile", { users: user });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    return flashErrorAndRedirect(req, res, "An error occurred while fetching profile", "/");
   }
-  const users = await getUserById(req.user.id);
-
-  if (!users) {
-    req.flash("error", "User not found");
-    return res.redirect("/login");
-  }
-
-  return res.render("auth/profile", { users });
 };
 
 export const logoutUser = (req, res) => {
-  let option = { httpOnly: true, sameSite: "lax", secure: false, path: "/" };
-  res.clearCookie("access_token");
-  res.clearCookie("refresh_token");
-  res.redirect("/login");
+  clearAuthCookies(res);
+  return flashSuccessAndRedirect(req, res, "Logged out successfully", "/login");
 };
 
 export const getEditProfilePage = (req, res) => {
-  if (!req.user) {
-    return res.redirect("/login");
-  }
+    if (!requireAuth(req, res)) return ;
+
   return res.render("auth/edit-profile");
 };
 
 export const postEditProfilePage = async (req, res) => {
+    if (!requireAuth(req, res)) return ;
+
   try {
     const { username, email, password } = req.body;
-    console.log(username, email, password);
 
-    const validateEmail = await getUserByEmail(email);
+    const existingUser = await getUserByEmail(email);
 
-    if (validateEmail && validateEmail.id !== req.user.id) {
-      req.flash("error", "Email already in use");
-      return res.redirect("/profile/edit");
+    if (existingUser && existingUser.id !== req.user.id) {
+      return flashErrorAndRedirect(req, res, "Email already in use", "/profile/edit");
     }
+
     await updateUser(req.user.id, { username, email, password });
-    res.redirect("/profile");
+    return flashSuccessAndRedirect(req, res, "Profile updated successfully", "/profile");
   } catch (error) {
     console.error("Profile update error:", error);
+    return flashErrorAndRedirect(req, res, "An error occurred while updating profile", "/profile/edit");
   }
 };

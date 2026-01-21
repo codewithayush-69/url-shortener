@@ -4,26 +4,21 @@ import * as authController from "../controller/auth.controller.js";
 const router = Router();
 
 router
-.route("/register")
-.get(authController.getRegisterPage)
-.post(authController.postRegisterPage);
+  .route("/register")
+  .get(authController.getRegisterPage)
+  .post(authController.postRegisterPage);
 
 router
-.route("/login")
-.get(authController.getLoginPage)
-.post(authController.postLoginPage);
+  .route("/login")
+  .get(authController.getLoginPage)
+  .post(authController.postLoginPage);
 
 router
-.route("/profile/edit")
-.get(authController.getEditProfilePage)
-.post(authController.postEditProfilePage);
+  .route("/profile/edit")
+  .get(authController.getEditProfilePage)
+  .post(authController.postEditProfilePage);
 
 router.route("/profile").get(authController.getProfilePage);
 router.route("/logout").post(authController.logoutUser);
-
-router
-.route("/profile/edit")
-.get(authController.getEditProfilePage)
-.post(authController.postEditProfilePage);
 
 export const authRoutes = router; 

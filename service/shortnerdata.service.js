@@ -37,38 +37,27 @@ import { shortLinks } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
 
 export const loadLink = async (userId) => {
-  // return shortnerLinks.find().toArray();
-  // const [rows] = await db.execute("select * from short_links");
-  // return rows;
-  const data = await db.select().from(shortLinks).where(eq(shortLinks.userId, userId));
+  const data = await db
+    .select()
+    .from(shortLinks)
+    .where(eq(shortLinks.userId, userId));
   return data;
 };
 
 export const insertShortink = async ({ url, shortCode, userId }) => {
-  // return shortnerLinks.insertOne(link);
-  // const [result] = await db.execute(
-  //   "insert into short_links(short_code, url) values(?,?)",
-  //   [shortCode, url]
-  // );
-  // return result;
-
-  const data = await db.insert(shortLinks).values({
-    url: url,
-    shortCode: shortCode,
-    userId: userId,
+  return await db.insert(shortLinks).values({
+    url,
+    shortCode,
+    userId,
   });
 };
 
 export const getLinkByShortCode = async (shortcode) => {
-  // return await shortnerLinks.findOne({ shortCode: shortcode });
-  // const [rows] = await db.execute(`select * from short_links where short_code = ?`,[shortcode]);
- 
   const rows = await db
     .select()
     .from(shortLinks)
     .where(eq(shortLinks.shortCode, shortcode));
 
-  // drizzle select() always returns an array
   return rows[0] || null;
 };
 
@@ -84,7 +73,8 @@ export const getLinkById = async (id) => {
   const rows = await db
     .select()
     .from(shortLinks)
-    .where(eq(shortLinks.id, id));  
+    .where(eq(shortLinks.id, id));
+
   return rows[0] || null;
 };
 

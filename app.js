@@ -12,9 +12,11 @@ import { verfiAuthentication } from "./middlewares/verify-auth.middlewaers.js";
 
 const app = express();
 
+// View engine configuration
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "views"));
 
+// Middleware
 app.use(express.static("style"));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -31,17 +33,19 @@ app.use(flash());
 app.use(requestIp.mw());
 app.use(verfiAuthentication);
 
+// Local variables middleware
 app.use((req, res, next) => {
   res.locals.user = req.user;
   res.locals.messages = req.flash();
   next();
 });
 
+// Routes
 app.use(authRoutes);
 app.use(shortnerRouter);
 
+// Start server
 const port = process.env.PORT || 5000;
-
 app.listen(port, "0.0.0.0", () => {
-  console.log(`server running at : http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });

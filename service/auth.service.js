@@ -10,9 +10,9 @@ import {
 } from "../config/constants.js";
 
 export const insertUser = async ({ username, email, hashedPassword }) => {
-  const data = await db.insert(users).values({
-    username: username,
-    email: email,
+  return await db.insert(users).values({
+    username,
+    email,
     passwordHash: hashedPassword,
   });
 };
@@ -51,10 +51,6 @@ export const verifyPassword = async (hashedPassword, plainPassword) => {
     return false;
   }
 };
-
-// export const genrateToken = (payload) => {
-//   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
-// };
 
 export const createSession = async (userId, { ip, userAgent }) => {
   const session = await db
@@ -109,41 +105,41 @@ export const updateUser = async (userId, data) => {
   await db.update(users).set(updateData).where(eq(users.id, userId));
 };
 
-const findBysessionId = async (sessionId) => {
+const findSessionById = async (sessionId) => {
   const rows = await db
     .select()
     .from(sessionsTable)
     .where(eq(sessionsTable.id, sessionId));
+
   return rows[0];
 };
 
 export const checkRefreshToken = async (token) => {
   const decoded = verifyJwtToken(token);
-  const currentSession = await findBysessionId(decoded.sessionId);
-  
-  if (!currentSession||!currentSession.valid) {
+  const currentSession = await findSessionById(decoded.sessionId);
+
+  if (!currentSession || !currentSession.valid) {
     throw new Error("Invalid session");
   }
-  
+
   const user = await getUserById(currentSession.userId);
   if (!user) {
     throw new Error("User not found");
   }
-  
-  const userinfo = {
+
+  const userInfo = {
     id: user.id,
     username: user.username,
     email: user.email,
     sessionId: currentSession.id,
   };
 
-  const newAccessToken = genrateAccessToken(userinfo);
+  const newAccessToken = genrateAccessToken(userInfo);
   const newRefreshToken = createRefreshToken(currentSession.id);
 
   return {
     newAccessToken,
     newRefreshToken,
-    user: userinfo
+    user: userInfo,
   };
-
 };
