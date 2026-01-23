@@ -18,6 +18,11 @@ router
   .get(authController.getEditProfilePage)
   .post(authController.postEditProfilePage);
 
+router
+  .route("/profile/change-password")
+  .get(authController.getPasswordChangePage)
+  .post(authController.postPasswordChangePage)
+
 router.route("/profile").get(authController.getProfilePage);
 router.route("/logout").post(authController.logoutUser);
 

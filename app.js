@@ -26,6 +26,11 @@ app.use(
     secret: "flash-only-secret",
     resave: false,
     saveUninitialized: false,
+    cookie: { 
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      httpOnly: true,
+      sameSite: 'strict'
+    }
   })
 );
 

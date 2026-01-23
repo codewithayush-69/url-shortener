@@ -3,13 +3,23 @@ import { ACCESS_TOKEN_COOKIE_OPTIONS, REFRESH_TOKEN_COOKIE_OPTIONS } from "../co
 
 export const flashErrorAndRedirect = (req, res, message, redirectPath) => {
   req.flash("error", message);
-  return res.redirect(redirectPath);
+  req.session.save((err) => {
+    if (err) {
+      console.error("Session save error:", err);
+    }
+    return res.redirect(redirectPath);
+  });
 };
 
 
 export const flashSuccessAndRedirect = (req, res, message, redirectPath) => {
   req.flash("success", message);
-  return res.redirect(redirectPath);
+  req.session.save((err) => {
+    if (err) {
+      console.error("Session save error:", err);
+    }
+    return res.redirect(redirectPath);
+  });
 };
 
 export const requireAuth = (req, res) => {

@@ -46,8 +46,14 @@ export const verfiAuthentication = async (req, res, next) => {
 
       return next();
     } catch (error) {
-      console.error("Refresh token verification error:", error);
+      // Clear cookies when refresh token/session invalid to avoid repeated attempts
+      try {
+        res.clearCookie('access_token');
+        res.clearCookie('refresh_token');
+      } catch (e) {}
       req.user = null;
+      // Keep log concise so container logs aren't flooded
+      console.warn("Refresh token invalid or session expired (cookies cleared)");
     }
   }
 

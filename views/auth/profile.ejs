@@ -4,38 +4,55 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/style.css" />
-    <title>Profile</title>
+    <title><%= users.username %> - Profile</title>
   </head>
+
   <%- include('../header') %>
 
   <body>
-    <span class="profile-page">
-      <div class="profile-container">
-        <div class="profile-header">
-          <h1>User Profile</h1>
-        </div>
+    <main class="profile-page">
+      <section class="profile-card-wrap">
+        <div class="profile-card">
+          <div class="profile-top">
+            <div class="avatar"> <span><%= users.username ? users.username.charAt(0).toUpperCase() : 'U' %></span> </div>
+            <div class="profile-meta">
+              <h2 class="profile-name"><%= users.username %></h2>
+              <p class="profile-email"><%= users.email %></p>
+              <p class="member-since">Member since <%= stats && stats.joined ? stats.joined : '' %></p>
+            </div>
+          </div>
 
-        <div class="profile-info">
-          <span class="label">Username:</span>
-          <span class="value"><%= users.username %></span>
-        </div>
+          <div class="profile-stats">
+            <div class="stat">
+              <div class="stat-number"><%= stats ? stats.linksCreated : 0 %></div>
+              <div class="stat-label">Links Created</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number"><%= stats && stats.lastActive ? stats.lastActive : 'Today' %></div>
+              <div class="stat-label">Last Active</div>
+            </div>
+          </div>
 
-        <div class="profile-info">
-          <span class="label">Email:</span>
-          <span class="value"><%= users.email %></span>
-        </div>
+          <div class="email-verify">
+            Email Verification: <span class="badge <%= users.emailVerified ? 'verified' : 'unverified' %>"><%= users.emailVerified ? 'Verified' : 'Not Verified' %></span>
+            <% if (!users.emailVerified) { %>
+            <form action="/verify-email" method="POST" class="inline-form">
+              <button class="btn-ghost" type="submit">Verify Now</button>
+            </form>
+            <% } %>
+          </div>
 
-        <div class="profile-actions">
-          <form action="/profile/edit" method="GET">
-            <button class="btn btn-edit" type="submit">Edit Profile</button>
-          </form>
-
-          <form action="/logout" method="POST">
-            <button class="btn btn-logout" type="submit">Logout</button>
-          </form>
+          <div class="profile-actions">
+            <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
+            <a href="/profile/change-password" class="btn btn-secondary">Change Password</a>
+            <form action="/logout" method="POST" class="inline-form">
+              <button class="btn btn-logout" type="submit">Logout</button>
+            </form>
+          </div>
         </div>
-      </div>
-    </span>
+      </section>
+    </main>
+
+    <%- include('../footer') %>
   </body>
-  <%- include('../footer') %>
 </html>
