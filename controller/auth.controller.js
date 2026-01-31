@@ -13,6 +13,9 @@ import {
   createSession,
   createRefreshToken,
   genrateAccessToken,
+  randomTokenGenerator,
+  insertVerifyEmailtoken,
+  craeteEmailVerificationLink,
 } from "../service/auth.service.js";
 import { validate, getFirstErrorMessage } from "../utils/validation.js";
 import {
@@ -24,7 +27,7 @@ import {
   requireAuth,
 } from "../utils/response.js";
 import { loadLink } from "../service/shortnerdata.service.js";
-import { email } from "zod";
+import { sendEmail } from "../utils/mailer.js";
 
 export const getRegisterPage = (req, res) => {
   if (!requireNotAuth(req, res)) return;
@@ -81,6 +84,7 @@ export const postRegisterPage = async (req, res, next) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      isEmailValid: false,
       sessionId: session.id,
     };
 
@@ -148,6 +152,7 @@ export const postLoginPage = async (req, res) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      isEmailValid: user.isEmailValid,
       sessionId: session.id,
     };
 
@@ -163,7 +168,7 @@ export const postLoginPage = async (req, res) => {
       req,
       res,
       "An error occurred during login",
-      "/login"
+      "/login",
     );
   }
 };
@@ -273,7 +278,6 @@ export const postPasswordChangePage = async (req, res) => {
 
     const { password, oldPassword, confirm_password } = data;
 
-    // Check if new passwords match
     if (password !== confirm_password) {
       return flashErrorAndRedirect(
         req,
@@ -283,10 +287,12 @@ export const postPasswordChangePage = async (req, res) => {
       );
     }
 
-    // Verify old password
     const user = await getUserById(req.user.id);
-    const isOldPasswordValid = await verifyPassword(user.passwordHash, oldPassword);
-    
+    const isOldPasswordValid = await verifyPassword(
+      user.passwordHash,
+      oldPassword,
+    );
+
     if (!isOldPasswordValid) {
       return flashErrorAndRedirect(
         req,
@@ -296,7 +302,6 @@ export const postPasswordChangePage = async (req, res) => {
       );
     }
 
-    // Check if new password is different from old password
     const isSamePassword = await verifyPassword(user.passwordHash, password);
     if (isSamePassword) {
       return flashErrorAndRedirect(
@@ -307,10 +312,9 @@ export const postPasswordChangePage = async (req, res) => {
       );
     }
 
-    // Hash and update new password
     const newHashedPassword = await hashingPassword(password);
-    await updateUser(req.user.id, { passwordHash: newHashedPassword });
-    
+    await updateUser(req.user.id, { newHashedPassword });
+
     return flashSuccessAndRedirect(
       req,
       res,
@@ -324,6 +328,59 @@ export const postPasswordChangePage = async (req, res) => {
       res,
       "An error occurred while updating password",
       "/profile/change-password",
+    );
+  }
+};
+
+export const getVerifyEmailPage = async (req, res) => {
+  try {
+    if (!requireAuth(req, res)) return;
+    const user = await getUserById(req.user.id);
+    if (!user || user.isEmailValid) return res.redirect("/");
+
+    res.render("auth/verify-email", { user });
+  } catch (error) {
+    console.error("Email verification error:", error);
+  }
+};
+
+export const postResendVerification = async (req, res) => {
+  try {
+    if (!requireAuth(req, res)) return;
+    const user = await getUserById(req.user.id);
+    if (!user || user.isEmailValid) {
+      return flashErrorAndRedirect(req, res, "Email is already verified", "/");
+    }
+
+    const randomToken = randomTokenGenerator();
+    await insertVerifyEmailtoken({ userId: user.id, token: randomToken });
+    const verificationLink = craeteEmailVerificationLink({
+      email: user.email,
+      token: randomToken,
+    });
+
+    sendEmail({
+      to: user.email,
+      subject: "Verify your email",
+      html:`<h1>Please verify your email by clicking the link below:</h1>
+            <p> You use this Token: <code>${randomToken}</code></p>
+            <a href="${verificationLink}">Verify Email</a>`,
+    }).catch(console.error);
+
+    return flashSuccessAndRedirect(
+      req,
+      res,
+      "Verification email resent successfully",
+      "/verify_email",
+    );
+    
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    return flashErrorAndRedirect(
+      req,
+      res,
+      "An error occurred while resending verification email",
+      "/verify_email",
     );
   }
 };

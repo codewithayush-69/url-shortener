@@ -1,45 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/style.css" />
-    <title><%= users.username %> - Profile</title>
-  </head>
 
-  <%- include('../header') %>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/style.css" />
+  <title>
+    <%= users.username %> - Profile
+  </title>
+</head>
+
+<%- include('../header') %>
 
   <body>
     <main class="profile-page">
       <section class="profile-card-wrap">
         <div class="profile-card">
           <div class="profile-top">
-            <div class="avatar"> <span><%= users.username ? users.username.charAt(0).toUpperCase() : 'U' %></span> </div>
+            <div class="avatar"> <span>
+                <%= users.username ? users.username.charAt(0).toUpperCase() : 'U' %>
+              </span> </div>
             <div class="profile-meta">
-              <h2 class="profile-name"><%= users.username %></h2>
-              <p class="profile-email"><%= users.email %></p>
-              <p class="member-since">Member since <%= stats && stats.joined ? stats.joined : '' %></p>
+              <h2 class="profile-name">
+                <%= users.username %>
+              </h2>
+              <p class="profile-email">
+                <%= users.email %>
+              </p>
+              <p class="member-since">Member since <%= stats && stats.joined ? stats.joined : '' %>
+              </p>
             </div>
           </div>
 
           <div class="profile-stats">
             <div class="stat">
-              <div class="stat-number"><%= stats ? stats.linksCreated : 0 %></div>
+              <div class="stat-number">
+                <%= stats ? stats.linksCreated : 0 %>
+              </div>
               <div class="stat-label">Links Created</div>
             </div>
             <div class="stat">
-              <div class="stat-number"><%= stats && stats.lastActive ? stats.lastActive : 'Today' %></div>
+              <div class="stat-number">
+                <%= stats && stats.lastActive ? stats.lastActive : 'Today' %>
+              </div>
               <div class="stat-label">Last Active</div>
             </div>
           </div>
 
-          <div class="email-verify">
-            Email Verification: <span class="badge <%= users.emailVerified ? 'verified' : 'unverified' %>"><%= users.emailVerified ? 'Verified' : 'Not Verified' %></span>
-            <% if (!users.emailVerified) { %>
-            <form action="/verify-email" method="POST" class="inline-form">
-              <button class="btn-ghost" type="submit">Verify Now</button>
-            </form>
-            <% } %>
+          <div class="profile-verification">
+            <p class="verification-status">
+              <span class="verification-label">Email Verification:</span>
+              <% if (user.isEmailValid) { %>
+                <span class="verification-badge verified">
+                  <i class="zmdi zmdi-check-circle"></i> Verified
+                </span>
+                <% } else { %>
+                  <span class="verification-badge not-verified">
+                    <i class="zmdi zmdi-alert-circle"></i> Not Verified
+                  </span>
+                  <a href="/verify_email" class="verify-link">
+                    <i class="zmdi zmdi-mail-send"></i> Verify Now
+                  </a>
+                  <% } %>
+            </p>
           </div>
 
           <div class="profile-actions">
@@ -55,4 +78,5 @@
 
     <%- include('../footer') %>
   </body>
+
 </html>

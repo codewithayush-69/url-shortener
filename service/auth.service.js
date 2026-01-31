@@ -1,8 +1,9 @@
 import { db } from "../config/db-client.js";
-import { users, sessionsTable } from "../drizzle/schema.js";
-import { eq } from "drizzle-orm";
+import { users, sessionsTable, verifyEmailTokens } from "../drizzle/schema.js";
+import { eq, sql, lt } from "drizzle-orm";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import {
   ACCESS_TOKEN_EXPIRY,
   MILLISECONDS_PER_SECOND,
@@ -94,8 +95,8 @@ export const updateUser = async (userId, data) => {
     updateData.email = data.email;
   }
 
-  if (data.password) {
-    updateData.passwordHash = await hashingPassword(data.password);
+  if (data.newHashedPassword) {
+    updateData.passwordHash = data.newHashedPassword;
   }
 
   if (Object.keys(updateData).length === 0) {
@@ -131,6 +132,7 @@ export const checkRefreshToken = async (token) => {
     id: user.id,
     username: user.username,
     email: user.email,
+    isEmailValid: user.isEmailValid,
     sessionId: currentSession.id,
   };
 
@@ -142,4 +144,30 @@ export const checkRefreshToken = async (token) => {
     newRefreshToken,
     user: userInfo,
   };
+};
+
+export const randomTokenGenerator = (digit = 6) => {
+  const min = 10 ** (digit - 1);
+  const max = 10 ** digit - 1;
+  return crypto.randomInt(min, max).toString();
+};
+
+export const insertVerifyEmailtoken = async ({ userId, token }) => {
+  try {
+    await db
+      .delete(verifyEmailTokens)
+      .where(lt(verifyEmailTokens.expiresAt, sql`CURRENT_TIMESTAMP`));
+    await db.insert(verifyEmailTokens).values({
+      userId,
+      token,
+    });
+  } catch (error) {
+    console.error("Error inserting verify email token:", error);
+    throw error;
+  }
+};
+
+export const craeteEmailVerificationLink = ({ email, token }) => {
+  const encodedEmail = encodeURIComponent(email);
+  return `${process.env.BASE_URL}/verify-email?email=${encodedEmail}&token=${token}`;
 };

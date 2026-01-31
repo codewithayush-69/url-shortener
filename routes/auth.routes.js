@@ -21,9 +21,14 @@ router
 router
   .route("/profile/change-password")
   .get(authController.getPasswordChangePage)
-  .post(authController.postPasswordChangePage)
+  .post(authController.postPasswordChangePage);
 
 router.route("/profile").get(authController.getProfilePage);
 router.route("/logout").post(authController.logoutUser);
 
-export const authRoutes = router; 
+router.route("/verify_email").get(authController.getVerifyEmailPage);
+
+router
+  .route("/resend-verification")
+  .post(authController.postResendVerification);
+export const authRoutes = router;

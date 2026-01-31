@@ -21,7 +21,7 @@
         <h2 class="section-title">Create a Short Link</h2>
 
         <% if (typeof messages.error !== 'undefined' && messages.error) { %>
-          <div class="alert alert-error">
+          <div class="alert alert-error"> 
             <i class="zmdi zmdi-close-circle-o"></i>
             <span><%= messages.error[0] %></span>
           </div>
@@ -38,7 +38,7 @@
               if (successAlert) {
                 successAlert.style.display = 'none';
               }
-            }, 30000);
+            }, 10000);
           </script>
         <% } else { %>
           <div class="alert alert-info">

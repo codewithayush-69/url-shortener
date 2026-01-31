@@ -11,7 +11,7 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - "D:\\sql-data:/var/lib/mysql"
+      - "/mnt/New Volume/sql-data:/var/lib/mysql"
 
   backend:
     build:
