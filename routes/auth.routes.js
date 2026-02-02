@@ -26,7 +26,8 @@ router
 router.route("/profile").get(authController.getProfilePage);
 router.route("/logout").post(authController.logoutUser);
 
-router.route("/verify_email").get(authController.getVerifyEmailPage);
+router.get("/verify_email-page", authController.getVerifyEmailPage);
+router.get("/verify_email-code", authController.verifyEmailCode);
 
 router
   .route("/resend-verification")

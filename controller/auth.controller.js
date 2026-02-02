@@ -2,6 +2,7 @@ import {
   loginUserSchema,
   registerUserSchema,
   changePasswordSchema,
+  verifyEmailSchema,
 } from "../Register-user-schema/auth.validator.js";
 import {
   insertUser,
@@ -16,6 +17,9 @@ import {
   randomTokenGenerator,
   insertVerifyEmailtoken,
   craeteEmailVerificationLink,
+  findVerfiyEmailToken,
+  deleteVerifyEmailToken,
+  verifyEmailAndUpdateStatus,
 } from "../service/auth.service.js";
 import { validate, getFirstErrorMessage } from "../utils/validation.js";
 import {
@@ -58,7 +62,7 @@ export const postRegisterPage = async (req, res, next) => {
         "/register",
       );
     }
-
+    0;
     let existingUser = await getUserByEmail(email);
 
     if (existingUser) {
@@ -344,9 +348,66 @@ export const getVerifyEmailPage = async (req, res) => {
   }
 };
 
-export const postResendVerification = async (req, res) => {
+export const verifyEmailCode = async (req, res) => {
   try {
     if (!requireAuth(req, res)) return;
+
+    const { data, error } = validate(verifyEmailSchema, req.query);
+    if (error) {
+      return flashErrorAndRedirect(
+        req,
+        res,
+        getFirstErrorMessage(error),
+        "/verify_email-page",
+      );
+    }
+
+    const token = await findVerfiyEmailToken(data);
+    if (!token) {
+      return flashErrorAndRedirect(
+        req,
+        res,
+        "Invalid or expired verification token",
+        "/verify_email-page",
+      );
+    }
+    await verifyEmailAndUpdateStatus(token.email);
+    await deleteVerifyEmailToken(token.email).catch(console.error);
+
+    const user = await getUserById(req.user.id);
+    
+    const userPayload = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      isEmailValid: true,
+      sessionId: session.id,
+    };
+    
+    clearAuthCookies(res);
+    const accessToken = genrateAccessToken(userPayload);
+    const refreshToken = createRefreshToken(req.user.sessionId);
+    setAuthCookies(res, accessToken, refreshToken);
+
+    return flashSuccessAndRedirect(
+      req,
+      res,
+      "Email verified successfully",
+      "/profile",
+    );
+  } catch (error) {
+    console.error("Email verification error:", error);
+    return flashErrorAndRedirect(
+      req,
+      res,
+      "An error occurred during verification",
+      "/verify_email-page",
+    );
+  }
+};
+
+export const postResendVerification = async (req, res) => {
+  try {
     const user = await getUserById(req.user.id);
     if (!user || user.isEmailValid) {
       return flashErrorAndRedirect(req, res, "Email is already verified", "/");
@@ -362,7 +423,7 @@ export const postResendVerification = async (req, res) => {
     sendEmail({
       to: user.email,
       subject: "Verify your email",
-      html:`<h1>Please verify your email by clicking the link below:</h1>
+      html: `<h1>Please verify your email by clicking the link below:</h1>
             <p> You use this Token: <code>${randomToken}</code></p>
             <a href="${verificationLink}">Verify Email</a>`,
     }).catch(console.error);
@@ -371,16 +432,15 @@ export const postResendVerification = async (req, res) => {
       req,
       res,
       "Verification email resent successfully",
-      "/verify_email",
+      "/verify_email-page",
     );
-    
   } catch (error) {
     console.error("Resend verification error:", error);
     return flashErrorAndRedirect(
       req,
       res,
       "An error occurred while resending verification email",
-      "/verify_email",
+      "/verify_email-page",
     );
   }
 };

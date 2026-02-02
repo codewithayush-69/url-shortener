@@ -28,19 +28,21 @@
             <p class="verify-email-text"><%= user.email %></p>
           </div>
 
-          <form action="/verify_email" method="POST" class="verify-email-form">
+          <form action="/verify_email-code" method="get" class="verify-email-form">
             <div class="form-group">
               <label for="verificationCode" class="form-label">Verification Code</label>
               <input
                 type="text"
                 id="verificationCode"
-                name="verificationCode"
+                name="token"
                 placeholder="Enter 6-digit code"
                 class="form-input"
                 maxlength="6"
                 required
               />
             </div>
+
+            <input type="hidden" value="<%= user.email %>" name="email" />
 
             <button type="submit" class="btn btn-verify">Verify Email</button>
           </form>

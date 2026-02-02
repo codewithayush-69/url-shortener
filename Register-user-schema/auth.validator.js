@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { email } from "zod";
 
 export const loginUserSchema = z.object({
   email: z
@@ -60,4 +60,12 @@ export const changePasswordSchema = z.object({
     .trim()
     .min(6, { message: "Password must be at least 6 characters long" })
     .max(100, { message: "Password must be at most 100 characters long" }),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z
+    .string()
+    .trim()
+    .length(6, { message: "Verification code must be 6 characters long" }),
+  email: z.string().trim().email(),
 });
