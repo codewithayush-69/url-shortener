@@ -187,36 +187,65 @@ export const craeteEmailVerificationLink = ({ email, token }) => {
   return url.toString();
 };
 
+// export const findVerfiyEmailToken = async ({ token, email }) => {
+//   const tokenData = await db
+//     .select({
+//       userId: verifyEmailTokens.userId,
+//       token: verifyEmailTokens.token,
+//       expiresAt: verifyEmailTokens.expiresAt,
+//     })
+//     .from(verifyEmailTokens)
+//     .where(
+//       and(
+//         eq(verifyEmailTokens.token, token),
+//         gte(verifyEmailTokens.expiresAt, sql`CURRENT_TIMESTAMP`),
+//       ),
+//     );
+
+//   if (tokenData.length === 0) {
+//     return null;
+//   }
+
+//   const userData = await getUserById(tokenData[0].userId);
+//   if (!userData || userData.email !== email) {
+//     return null;
+//   }
+
+//   return {
+//     userId: tokenData[0].userId,
+//     email: userData.email,
+//     token: tokenData[0].token,
+//     expiresAt: tokenData[0].expiresAt,
+//   };
+// };
+
 export const findVerfiyEmailToken = async ({ token, email }) => {
-  const tokenData = await db
-    .select({
-      userId: verifyEmailTokens.userId,
-      token: verifyEmailTokens.token,
-      expiresAt: verifyEmailTokens.expiresAt,
-    })
-    .from(verifyEmailTokens)
-    .where(
-      and(
-        eq(verifyEmailTokens.token, token),
-        gte(verifyEmailTokens.expiresAt, sql`CURRENT_TIMESTAMP`),
-      ),
-    );
+  const data = await db
+  .select({
+    userId: users.id,
+    email: users.email,
+    token: verifyEmailTokens.token,
+    expiresAt: verifyEmailTokens.expiresAt,
+  })
+  .from(verifyEmailTokens)
+  .where(and(
+  eq(verifyEmailTokens.token, token),
+  gte(verifyEmailTokens.expiresAt, sql`CURRENT_TIMESTAMP`),
+  eq(users.email, email)
+))
+  .innerJoin(users, eq(verifyEmailTokens.userId, users.id))
 
-  if (tokenData.length === 0) {
+  if (data.length === 0) {
     return null;
   }
-  const userData = await getUserById(tokenData[0].userId);
-  if (!userData || userData.email !== email) {
-    return null;
-  }
-
   return {
-    userId: tokenData[0].userId,
-    email: userData.email,
-    token: tokenData[0].token,
-    expiresAt: tokenData[0].expiresAt,
+    userId: data[0].userId,
+    email: data[0].email,
+    token: data[0].token,
+    expiresAt: data[0].expiresAt,
   };
 };
+
 
 export const verifyEmailAndUpdateStatus = async (email) => {
   await db

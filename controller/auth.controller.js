@@ -219,7 +219,7 @@ export const logoutUser = (req, res) => {
 export const getEditProfilePage = (req, res) => {
   if (!requireAuth(req, res)) return;
 
-  return res.render("auth/edit-profile");
+  return res.render("auth/edit-profile", {users: req.user} );
 };
 
 export const postEditProfilePage = async (req, res) => {
@@ -381,7 +381,7 @@ export const verifyEmailCode = async (req, res) => {
       username: user.username,
       email: user.email,
       isEmailValid: true,
-      sessionId: session.id,
+      sessionId:  req.user.sessionId,
     };
     
     clearAuthCookies(res);
